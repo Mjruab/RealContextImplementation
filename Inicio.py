@@ -32,7 +32,13 @@ h1 { color: #f57f17 !important; }
 h2, h3 { color: #e65100 !important; }
 
 /* Inputs */
-input, textarea {
+input {
+    background-color: #fffff0 !important;
+    border: 1px solid #f9a825 !important;
+}
+
+/* Select */
+[data-baseweb="select"] > div {
     background-color: #fffff0 !important;
     border: 1px solid #f9a825 !important;
 }
@@ -43,7 +49,6 @@ input, textarea {
     color: white !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
-    width: 100%;
 }
 .stButton > button:hover {
     background: #f57f17 !important;
@@ -110,10 +115,8 @@ with st.sidebar:
 
     st.markdown("### 🎯 Nivel de aprendizaje")
     nivel = st.radio(
-        "Nivel",
-        ["Niño", "Joven", "Adulto"],
-        horizontal=True,
-        label_visibility="collapsed"
+        "Selecciona el nivel",
+        ["Niño", "Joven", "Adulto"]
     )
 
     st.divider()
@@ -123,7 +126,6 @@ with st.sidebar:
     1. Dibuja algo  
     2. Analiza el dibujo  
     3. Aprende del resultado  
-    4. Responde y sigue explorando  
     """)
 
 # ─────────────────────────────────────────────
@@ -139,42 +141,50 @@ Aprende del mundo dibujando — la IA interpreta y te enseña
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# DIBUJO
+# SECCIÓN DIBUJO (CARD CORREGIDA)
 # ─────────────────────────────────────────────
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown("""
+<div class="section-card">
+    <h3>✏️ Dibuja tu idea</h3>
+    <p class="helper-text">Haz un boceto. Abajo aparecerá el análisis</p>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown("### ✏️ Dibuja tu idea")
-st.markdown('<p class="helper-text">Haz un boceto. Abajo aparecerá el análisis</p>', unsafe_allow_html=True)
+# ─── SUB-LAYOUT SOLO PARA ESTA PARTE ─────────
+col_canvas, col_controls = st.columns([3,1])
 
-canvas = st_canvas(
-    stroke_width=5,
-    stroke_color="#000000",
-    background_color="#FFFFFF",
-    height=320,
-    width=500,
-    drawing_mode="freedraw",
-    key=st.session_state.canvas_key,
-)
+with col_canvas:
+    canvas = st_canvas(
+        stroke_width=5,
+        stroke_color="#000000",
+        background_color="#FFFFFF",
+        height=300,
+        width=500,
+        drawing_mode="freedraw",
+        key=st.session_state.canvas_key,
+    )
 
-col_btn1, col_btn2 = st.columns([1,3])
+with col_controls:
+    st.markdown("<br>", unsafe_allow_html=True)
 
-with col_btn1:
     if st.button("🧹 Limpiar"):
         st.session_state.canvas_key = "canvas_" + str(np.random.randint(0,10000))
         st.session_state.analysis_done = False
         st.rerun()
 
-with col_btn2:
-    st.markdown('<p class="helper-text">⬇️ El resultado aparecerá más abajo</p>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <p class="helper-text">⬇️ El resultado aparecerá más abajo</p>
+    """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# ANÁLISIS
+# SECCIÓN ANÁLISIS (CARD)
 # ─────────────────────────────────────────────
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-st.markdown("### 🤖 Análisis inteligente")
+st.markdown("""
+<div class="section-card">
+    <h3>🤖 Análisis inteligente</h3>
+    <p class="helper-text">La IA interpretará tu dibujo</p>
+</div>
+""", unsafe_allow_html=True)
 
 api_key = st.text_input("API Key", type="password")
 os.environ["OPENAI_API_KEY"] = api_key
@@ -202,37 +212,32 @@ if st.button("🔍 Analizar dibujo"):
                         }
                     ]
                 }],
-                max_tokens=500
+                max_tokens=400
             )
 
             st.session_state.descripcion = response.choices[0].message.content
             st.session_state.analysis_done = True
-
     else:
         st.warning("Dibuja algo y agrega tu API key")
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # ─────────────────────────────────────────────
-# RESULTADO
+# RESULTADO (FLUJO LINEAL ✔)
 # ─────────────────────────────────────────────
 if st.session_state.analysis_done:
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-card">
+        <h3>🧠 Resultado</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("### 🧠 Resultado")
     st.write(st.session_state.descripcion)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# INTERACCIÓN
-# ─────────────────────────────────────────────
-if st.session_state.analysis_done:
-
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-    st.markdown("### 💬 Sigue aprendiendo")
+    st.markdown("""
+    <div class="section-card">
+        <h3>💬 Sigue aprendiendo</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
     user_answer = st.text_input("Tu respuesta")
 
@@ -256,5 +261,3 @@ if st.session_state.analysis_done:
             )
 
             st.write(follow_response.choices[0].message.content)
-
-    st.markdown('</div>', unsafe_allow_html=True)
