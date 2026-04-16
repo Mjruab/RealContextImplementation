@@ -116,7 +116,7 @@ with st.sidebar:
 
     st.markdown("### 🎯 Nivel de aprendizaje")
     nivel = st.radio(
-    "Nivel",
+    "Selecciona el nivel",
     ["Niño", "Joven", "Adulto"],
     horizontal=True
 )
@@ -148,14 +148,27 @@ Aprende del mundo dibujando — la IA interpreta y te enseña
 # ─────────────────────────────────────────────
 col1, col2 = st.columns(2)
 
+with col1:
+    st.markdown("""
+    <div class="section-card">
+        <h3>✏️ Dibuja tu idea</h3>
+        <p class="helper-text">No tiene que ser perfecto</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div class="section-card">
+        <h3>🤖 Análisis inteligente</h3>
+        <p class="helper-text">La IA interpretará tu dibujo</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────
 # CANVAS
 # ─────────────────────────────────────────────
 with col1:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-    st.markdown("### ✏️ Dibuja tu idea")
-    st.markdown('<p class="helper-text">No tiene que ser perfecto</p>', unsafe_allow_html=True)
 
     canvas = st_canvas(
         stroke_width=5,
@@ -179,9 +192,6 @@ with col1:
 # ─────────────────────────────────────────────
 with col2:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-    st.markdown("### 🤖 Análisis inteligente")
-    st.markdown('<p class="helper-text">La IA interpretará tu dibujo</p>', unsafe_allow_html=True)
 
     api_key = st.text_input("API Key", type="password")
     os.environ["OPENAI_API_KEY"] = api_key
