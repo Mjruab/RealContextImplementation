@@ -168,7 +168,6 @@ with col2:
 # CANVAS
 # ─────────────────────────────────────────────
 with col1:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
     canvas = st_canvas(
         stroke_width=5,
@@ -191,8 +190,7 @@ with col1:
 # IA
 # ─────────────────────────────────────────────
 with col2:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
+  
     api_key = st.text_input("API Key", type="password")
     os.environ["OPENAI_API_KEY"] = api_key
 
