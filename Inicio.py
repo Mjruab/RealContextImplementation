@@ -12,7 +12,7 @@ from streamlit_drawable_canvas import st_canvas
 st.set_page_config(page_title="Insight Sketch", layout="wide")
 
 # ─────────────────────────────────────────────
-# ESTILOS (TEMA UNIFICADO)
+# ESTILOS
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -20,24 +20,21 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-.stApp { background-color: #fffde7; color: #333333; }
+.stApp { background-color: #fffde7; color: #333; }
+
+[data-testid="stSidebar"] {
+    background-color: #fff9c4 !important;
+    border-right: 1px solid #f9a825;
+}
 
 /* Títulos */
-h1 {
-    color: #f57f17 !important;
-    font-weight: 700 !important;
-}
-h2, h3 {
-    color: #e65100 !important;
-    font-weight: 600 !important;
-}
+h1 { color: #f57f17 !important; }
+h2, h3 { color: #e65100 !important; }
 
 /* Inputs */
 input, textarea {
     background-color: #fffff0 !important;
     border: 1px solid #f9a825 !important;
-    border-radius: 6px !important;
-    color: #111827 !important;
 }
 
 /* Select */
@@ -105,31 +102,30 @@ def encode_image(img):
 
 def get_prompt(nivel):
     if nivel == "Niño":
-        return """
-        Observa este dibujo y responde:
-        - ¿Qué es?
-        - Explicación muy sencilla
-        - 1 dato curioso divertido
-        - Haz una pregunta fácil
-        """
+        return "Explica el dibujo de forma muy simple, con un dato curioso y una pregunta fácil."
     elif nivel == "Joven":
-        return """
-        Observa este dibujo y responde:
-        1. ¿Qué es?
-        2. Explicación clara
-        3. 2 datos curiosos
-        4. ¿Por qué es importante?
-        5. Haz una pregunta interesante
-        """
+        return "Explica el dibujo, da 2 datos curiosos, su importancia y haz una pregunta."
     else:
-        return """
-        Observa este dibujo y responde:
-        1. Identificación precisa
-        2. Explicación más profunda
-        3. 2-3 datos relevantes
-        4. Impacto en el mundo real
-        5. Pregunta reflexiva
-        """
+        return "Da una explicación profunda, contexto real, datos relevantes y una pregunta reflexiva."
+
+# ─────────────────────────────────────────────
+# SIDEBAR
+# ─────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("## 🧠 Insight Sketch")
+
+    st.markdown("### 🎯 Nivel de aprendizaje")
+    nivel = st.selectbox("Nivel", ["Niño", "Joven", "Adulto"])
+
+    st.divider()
+
+    st.markdown("### 📌 ¿Cómo funciona?")
+    st.markdown("""
+    1. Dibuja algo  
+    2. Analiza el dibujo  
+    3. Aprende del resultado  
+    4. Responde y sigue explorando  
+    """)
 
 # ─────────────────────────────────────────────
 # HEADER
@@ -138,41 +134,10 @@ st.markdown("""
 <div class="header-card">
 <h1>🧠 Insight Sketch</h1>
 <p style="color:#f57f17;">
-Aprende del mundo dibujando — la IA interpreta, explica y conversa contigo
+Aprende del mundo dibujando — la IA interpreta y te enseña
 </p>
 </div>
 """, unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# GUÍA
-# ─────────────────────────────────────────────
-st.markdown("""
-<div class="section-card">
-<h3>¿Cómo funciona?</h3>
-<p class="helper-text">
-1. Dibuja algo<br>
-2. Selecciona el nivel<br>
-3. Analiza el dibujo<br>
-4. Responde y sigue aprendiendo
-</p>
-</div>
-""", unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# NIVEL
-# ─────────────────────────────────────────────
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
-
-st.markdown("### 🎯 Nivel de aprendizaje")
-st.markdown('<p class="helper-text">Define cómo la IA te explicará el contenido</p>', unsafe_allow_html=True)
-
-nivel = st.selectbox(
-    "Nivel",
-    ["Niño", "Joven", "Adulto"],
-    label_visibility="collapsed"
-)
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # LAYOUT
@@ -186,7 +151,7 @@ with col1:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
     st.markdown("### ✏️ Dibuja tu idea")
-    st.markdown('<p class="helper-text">Haz un boceto simple</p>', unsafe_allow_html=True)
+    st.markdown('<p class="helper-text">No tiene que ser perfecto</p>', unsafe_allow_html=True)
 
     canvas = st_canvas(
         stroke_width=5,
@@ -263,7 +228,6 @@ if st.session_state.analysis_done:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
     st.markdown("### 💬 Sigue aprendiendo")
-    st.markdown('<p class="helper-text">Responde y profundiza</p>', unsafe_allow_html=True)
 
     user_answer = st.text_input("Tu respuesta")
 
@@ -271,13 +235,13 @@ if st.session_state.analysis_done:
         with st.spinner("Pensando..."):
 
             follow_prompt = f"""
-            El usuario vio esto:
+            Basado en:
             {st.session_state.descripcion}
 
-            Respondió:
+            Usuario respondió:
             {user_answer}
 
-            Amplía la explicación de forma clara y amigable.
+            Amplía el conocimiento de forma clara y amigable.
             """
 
             follow_response = openai.chat.completions.create(
@@ -286,7 +250,6 @@ if st.session_state.analysis_done:
                 max_tokens=300
             )
 
-            st.markdown("### 🤖 Respuesta de la IA")
             st.write(follow_response.choices[0].message.content)
 
     st.markdown('</div>', unsafe_allow_html=True)
