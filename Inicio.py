@@ -115,7 +115,11 @@ with st.sidebar:
     st.markdown("## 🧠 Insight Sketch")
 
     st.markdown("### 🎯 Nivel de aprendizaje")
-    nivel = st.selectbox("Nivel", ["Niño", "Joven", "Adulto"])
+    nivel = st.radio(
+    "Nivel",
+    ["Niño", "Joven", "Adulto"],
+    horizontal=True
+)
 
     st.divider()
 
