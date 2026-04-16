@@ -167,13 +167,13 @@ with col_canvas:
 with col_controls:
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🧹 Limpiar"):
+    if st.button("🧹 Limpiar canvas"):
         st.session_state.canvas_key = "canvas_" + str(np.random.randint(0,10000))
         st.session_state.analysis_done = False
         st.rerun()
 
     st.markdown("""
-    <p class="helper-text">⬇️ El resultado aparecerá más abajo</p>
+    <p class="helper-text">⬇️ El resultado del análisis aparecerá más abajo</p>
     """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
@@ -236,6 +236,7 @@ if st.session_state.analysis_done:
     st.markdown("""
     <div class="section-card">
         <h3>💬 Sigue aprendiendo</h3>
+        <p class="helper-text">Profundiza en lo que acabas de aprender respondiendo a la pregunta</p>
     </div>
     """, unsafe_allow_html=True)
 
