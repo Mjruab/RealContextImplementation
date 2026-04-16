@@ -37,12 +37,6 @@ input, textarea {
     border: 1px solid #f9a825 !important;
 }
 
-/* Select */
-[data-baseweb="select"] > div {
-    background-color: #fffff0 !important;
-    border: 1px solid #f9a825 !important;
-}
-
 /* Botones */
 .stButton > button {
     background: #f9a825 !important;
@@ -116,10 +110,11 @@ with st.sidebar:
 
     st.markdown("### 🎯 Nivel de aprendizaje")
     nivel = st.radio(
-    "Selecciona el nivel",
-    ["Niño", "Joven", "Adulto"],
-    horizontal=True
-)
+        "Nivel",
+        ["Niño", "Joven", "Adulto"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
 
     st.divider()
 
@@ -144,91 +139,89 @@ Aprende del mundo dibujando — la IA interpreta y te enseña
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# LAYOUT
+# DIBUJO
 # ─────────────────────────────────────────────
-col1, col2 = st.columns(2)
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
-with col1:
-    st.markdown("""
-    <div class="section-card">
-        <h3>✏️ Dibuja tu idea</h3>
-        <p class="helper-text">No tiene que ser perfecto</p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("### ✏️ Dibuja tu idea")
+st.markdown('<p class="helper-text">Haz un boceto. Abajo aparecerá el análisis</p>', unsafe_allow_html=True)
 
-with col2:
-    st.markdown("""
-    <div class="section-card">
-        <h3>🤖 Análisis inteligente</h3>
-        <p class="helper-text">La IA interpretará tu dibujo</p>
-    </div>
-    """, unsafe_allow_html=True)
+canvas = st_canvas(
+    stroke_width=5,
+    stroke_color="#000000",
+    background_color="#FFFFFF",
+    height=320,
+    width=500,
+    drawing_mode="freedraw",
+    key=st.session_state.canvas_key,
+)
 
-# ─────────────────────────────────────────────
-# CANVAS
-# ─────────────────────────────────────────────
-with col1:
+col_btn1, col_btn2 = st.columns([1,3])
 
-    canvas = st_canvas(
-        stroke_width=5,
-        stroke_color="#000000",
-        background_color="#FFFFFF",
-        height=300,
-        width=400,
-        drawing_mode="freedraw",
-        key=st.session_state.canvas_key,
-    )
-
-    if st.button("🧹 Limpiar canvas"):
+with col_btn1:
+    if st.button("🧹 Limpiar"):
         st.session_state.canvas_key = "canvas_" + str(np.random.randint(0,10000))
         st.session_state.analysis_done = False
         st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+with col_btn2:
+    st.markdown('<p class="helper-text">⬇️ El resultado aparecerá más abajo</p>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# IA
+# ANÁLISIS
 # ─────────────────────────────────────────────
-with col2:
-  
-    api_key = st.text_input("API Key", type="password")
-    os.environ["OPENAI_API_KEY"] = api_key
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
 
-    if st.button("🔍 Analizar dibujo"):
-        if canvas.image_data is not None and api_key:
+st.markdown("### 🤖 Análisis inteligente")
 
-            with st.spinner("Analizando..."):
-                img = Image.fromarray(canvas.image_data.astype('uint8'))
-                base64_img = encode_image(img)
+api_key = st.text_input("API Key", type="password")
+os.environ["OPENAI_API_KEY"] = api_key
 
-                prompt = get_prompt(nivel)
+if st.button("🔍 Analizar dibujo"):
+    if canvas.image_data is not None and api_key:
 
-                response = openai.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{base64_img}"
-                                }
+        with st.spinner("Analizando..."):
+            img = Image.fromarray(canvas.image_data.astype('uint8'))
+            base64_img = encode_image(img)
+
+            prompt = get_prompt(nivel)
+
+            response = openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{base64_img}"
                             }
-                        ]
-                    }],
-                    max_tokens=400
-                )
+                        }
+                    ]
+                }],
+                max_tokens=500
+            )
 
-                st.session_state.descripcion = response.choices[0].message.content
-                st.session_state.analysis_done = True
+            st.session_state.descripcion = response.choices[0].message.content
+            st.session_state.analysis_done = True
 
-        else:
-            st.warning("Dibuja algo y agrega tu API key")
+    else:
+        st.warning("Dibuja algo y agrega tu API key")
 
-    if st.session_state.analysis_done:
-        st.markdown("### 🧠 Resultado")
-        st.write(st.session_state.descripcion)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────
+# RESULTADO
+# ─────────────────────────────────────────────
+if st.session_state.analysis_done:
+
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+
+    st.markdown("### 🧠 Resultado")
+    st.write(st.session_state.descripcion)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
